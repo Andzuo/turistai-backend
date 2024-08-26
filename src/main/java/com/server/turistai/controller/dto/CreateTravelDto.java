@@ -59,10 +59,6 @@ public class CreateTravelDto {
         this.image = image;
     }
 
-    public Object setImage() {
-
-        return null;
-    }
     @Override
     public String toString() {
         return "CreateTravelDto{" +

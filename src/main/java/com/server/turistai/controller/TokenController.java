@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*")
 public class TokenController {
 
 
@@ -32,28 +34,33 @@ public class TokenController {
     }
 
     @PostMapping("/login")
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
 
         var user = userRepository.findByUsername(loginRequest.username());
 
-        if (user.isEmpty() || !user.get().isLoginCorrect(loginRequest, passwordEncoder)) {
+        if (user.isEmpty()) {
+            throw new BadCredentialsException("User or password is invalid");
+        }
+
+        if (!user.get().isLoginCorrect(loginRequest, passwordEncoder)) {
             throw new BadCredentialsException("User or password is invalid");
         }
 
         var now = Instant.now();
 
-        var expiresIn = 300L;
-
         var claims = JwtClaimsSet.builder()
                 .issuer("mybackend")
                 .subject(String.valueOf(user.get().getUserId()))
-                .expiresAt(now.plusSeconds(expiresIn))
                 .issuedAt(now)
                 .build();
 
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-        return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
+        boolean isPasswordCorrect = passwordEncoder.matches(loginRequest.password(), user.get().getPassword());
+
+
+        return ResponseEntity.ok(new LoginResponse(jwtValue));
     }
 
 }

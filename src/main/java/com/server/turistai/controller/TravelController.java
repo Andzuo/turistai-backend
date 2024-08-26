@@ -26,45 +26,41 @@ public class TravelController {
     }
 
     @PostMapping("/criar")
-    public ResponseEntity<Void> createTravel(@RequestBody CreateTravelDto dto,
-                                             JwtAuthenticationToken token) {
-
-
-
-            var user = userRepository.findById(Integer.valueOf(token.getName()));
-            if (user.isEmpty()) {
-                System.out.println("User not found for ID: " + token.getName());
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            var travel = new Travel();
-            travel.setUser(user.get());
-            travel.setTitle(dto.getTitle());
-            travel.setDescription(dto.getDescription());
-            travel.setDate(dto.getDate());
-
-            if (dto.getImage() != null && !dto.getImage().isEmpty()) {
-                travel.setImage(dto.getImage());
-            }
-
-            travelRepository.save(travel);
-
-            return ResponseEntity.ok().build();
+    public ResponseEntity<Void> createTravel(@RequestBody CreateTravelDto dto, JwtAuthenticationToken token) {
+        var user = userRepository.findById(Integer.valueOf(token.getName()));
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
+        var travel = new Travel();
+        travel.setUser(user.get());
+        travel.setTitle(dto.getTitle());
+        travel.setDescription(dto.getDescription());
+        travel.setDate(dto.getDate());
+
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            travel.setImage(dto.getImage());
+        }
+
+        travelRepository.save(travel);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/listar")
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<List<Travel>> getAllTravels(JwtAuthenticationToken token) {
         Integer userId = Integer.valueOf(token.getName());
 
         var userOptional = userRepository.findById(userId);
         if (userOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        };
+        }
         User user = userOptional.get();
-
         List<Travel> travels = travelRepository.findByUser(user);
 
         return ResponseEntity.ok(travels);
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTravel(@PathVariable Long id, JwtAuthenticationToken token) {
         Integer userId = Integer.valueOf(token.getName());
