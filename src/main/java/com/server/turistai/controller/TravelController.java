@@ -1,5 +1,6 @@
 package com.server.turistai.controller;
 
+import com.server.turistai.config.FileStorageProperties;
 import com.server.turistai.controller.dto.CreateTravelDto;
 import com.server.turistai.entities.Travel;
 import com.server.turistai.entities.User;
@@ -9,7 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,17 +24,25 @@ import java.util.Optional;
 @RequestMapping("/api/travels")
 public class TravelController {
 
+
+
+    private final Path fileStorageLocation;
     private final TravelRepository travelRepository;
     private final UserRepository userRepository;
 
-    public TravelController(TravelRepository travelRepository, UserRepository userRepository) {
+    public TravelController(TravelRepository travelRepository, UserRepository userRepository, FileStorageProperties fileStorageProperties) {
         this.travelRepository = travelRepository;
         this.userRepository = userRepository;
+        this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
     }
 
     @PostMapping("/criar")
-    public ResponseEntity<Void> createTravel(@RequestBody CreateTravelDto dto, JwtAuthenticationToken token) {
+    public ResponseEntity<Void> createTravel(@ModelAttribute CreateTravelDto dto,
+                                             @RequestParam(value = "file", required = false) MultipartFile file,
+                                             JwtAuthenticationToken token) {
+
         var user = userRepository.findById(Integer.valueOf(token.getName()));
+
         if (user.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -38,13 +53,34 @@ public class TravelController {
         travel.setDescription(dto.getDescription());
         travel.setDate(dto.getDate());
 
-        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
-            travel.setImage(dto.getImage());
+        travelRepository.save(travel);
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                String fileName = String.valueOf(travel.getId()) + "_" + file.getOriginalFilename();
+                Path filePath = Paths.get(fileStorageLocation.toString(), fileName);
+
+                Files.write(filePath, file.getBytes());
+
+                travel.setImage(fileName);
+                travelRepository.save(travel);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        travelRepository.save(travel);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/imagem/{imagem}")
+    @ResponseBody
+    public byte[] getImage(@PathVariable("imagem") String imagem) throws IOException {
+        File imageFile = new File(fileStorageLocation.toString(), imagem);
+        if (imageFile != null || imagem.trim().length() > 0) {
+        return Files.readAllBytes(imageFile.toPath());
+        };
+        return null;
+    };
 
     @GetMapping("/listar")
     @CrossOrigin(origins = "http://localhost:5173")
@@ -98,9 +134,6 @@ public class TravelController {
         travel.setTitle(dto.getTitle());
         travel.setDescription(dto.getDescription());
         travel.setDate(dto.getDate());
-        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
-            travel.setImage(dto.getImage());
-        }
 
         travelRepository.save(travel);
 

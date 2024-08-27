@@ -9,24 +9,18 @@ public class CreateTravelDto {
     private String title;
     private String description;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date date;
 
-    private String image;
 
-    // Construtor padrão
     public CreateTravelDto() {
     }
 
-    // Construtor com parâmetros
     public CreateTravelDto(String title, String description, Date date, String image) {
         this.title = title;
         this.description = description;
         this.date = date;
-        this.image = image;
     }
 
-    // Getters e Setters
     public String getTitle() {
         return title;
     }
@@ -51,13 +45,6 @@ public class CreateTravelDto {
         this.date = date;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
 
     @Override
     public String toString() {
@@ -65,7 +52,6 @@ public class CreateTravelDto {
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", date=" + date +
-                ", image='" + image + '\'' +
                 '}';
     }
 }
