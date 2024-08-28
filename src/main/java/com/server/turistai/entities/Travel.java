@@ -25,7 +25,6 @@ public class Travel {
     private String description;
 
     @Temporal(TemporalType.DATE)
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private Date date;
 
     private String image;

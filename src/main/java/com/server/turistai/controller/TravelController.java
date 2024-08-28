@@ -1,5 +1,6 @@
 package com.server.turistai.controller;
 
+import ch.qos.logback.classic.Logger;
 import com.server.turistai.config.FileStorageProperties;
 import com.server.turistai.controller.dto.CreateTravelDto;
 import com.server.turistai.entities.Travel;
@@ -11,12 +12,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.View;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,22 +34,23 @@ public class TravelController {
     private final Path fileStorageLocation;
     private final TravelRepository travelRepository;
     private final UserRepository userRepository;
+    private final View error;
 
-    public TravelController(TravelRepository travelRepository, UserRepository userRepository, FileStorageProperties fileStorageProperties) {
+    public TravelController(TravelRepository travelRepository, UserRepository userRepository, FileStorageProperties fileStorageProperties, View error) {
         this.travelRepository = travelRepository;
         this.userRepository = userRepository;
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
+        this.error = error;
     }
 
     @PostMapping("/criar")
-    public ResponseEntity<Void> createTravel(@ModelAttribute CreateTravelDto dto,
-                                             @RequestParam(value = "file", required = false) MultipartFile file,
-                                             JwtAuthenticationToken token) {
+    public ResponseEntity<String> createTravel(@ModelAttribute CreateTravelDto dto,
+                                               @RequestParam(value = "file", required = false) MultipartFile file,
+                                               JwtAuthenticationToken token) {
 
         var user = userRepository.findById(Integer.valueOf(token.getName()));
-
         if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
 
         var travel = new Travel();
@@ -53,7 +59,8 @@ public class TravelController {
         travel.setDescription(dto.getDescription());
         travel.setDate(dto.getDate());
 
-        travelRepository.save(travel);
+            travelRepository.save(travel);
+
 
         try {
             if (file != null && !file.isEmpty()) {
@@ -70,8 +77,10 @@ public class TravelController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Viagem criada com sucesso.");
     }
+
+
     @GetMapping("/imagem/{imagem}")
     @ResponseBody
     public byte[] getImage(@PathVariable("imagem") String imagem) throws IOException {

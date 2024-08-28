@@ -1,6 +1,8 @@
 package com.server.turistai.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -9,6 +11,8 @@ public class CreateTravelDto {
     private String title;
     private String description;
 
+    @NotNull
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
     private Date date;
 
 

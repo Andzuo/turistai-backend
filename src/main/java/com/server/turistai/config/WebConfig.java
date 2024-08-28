@@ -11,8 +11,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.text.SimpleDateFormat;
 
+/**
+ *
+ */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    /**
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -20,9 +24,11 @@ public class WebConfig implements WebMvcConfigurer {
         objectMapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy"));
         return objectMapper;
     }
-
+    */
+/**
     @Override
     public void addFormatters(FormatterRegistry registry) {
         registry.addFormatter(new DateFormatter("dd-MM-yyyy"));
     }
+    */
 }
