@@ -5,5 +5,6 @@ RUN mvn -f /app/pom.xml clean package -Dmaven.test.skip
 
 FROM openjdk:21-slim
 EXPOSE 8080
+RUN mkdir -p /app/uploads
 COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
