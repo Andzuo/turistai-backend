@@ -58,10 +58,10 @@ public class TravelController {
         travel.setTitle(dto.getTitle());
         travel.setDescription(dto.getDescription());
         travel.setDate(dto.getDate());
+        travel.setLocation(dto.getLocation());
+        travel.setState(dto.getState());
 
             travelRepository.save(travel);
-
-
         try {
             if (file != null && !file.isEmpty()) {
                 String fileName = String.valueOf(travel.getId()) + "_" + file.getOriginalFilename();
@@ -106,7 +106,7 @@ public class TravelController {
         return ResponseEntity.ok(travels);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<Void> deleteTravel(@PathVariable Long id, JwtAuthenticationToken token) {
         Integer userId = Integer.valueOf(token.getName());
 
@@ -123,6 +123,7 @@ public class TravelController {
         travelRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
     @PutMapping("edit/{id}")
     public ResponseEntity<Travel> updateTravel(@PathVariable Long id,
                                                @RequestBody CreateTravelDto dto,
@@ -143,6 +144,8 @@ public class TravelController {
         travel.setTitle(dto.getTitle());
         travel.setDescription(dto.getDescription());
         travel.setDate(dto.getDate());
+        travel.setLocation(dto.getLocation());
+        travel.setState(dto.getState());
 
         travelRepository.save(travel);
 

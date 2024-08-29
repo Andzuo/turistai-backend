@@ -6,6 +6,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
+/**
+ *
+ */
 @Entity
 @Table(name = "tb_travel")
 public class Travel {
@@ -26,6 +29,10 @@ public class Travel {
 
     @Temporal(TemporalType.DATE)
     private Date date;
+
+    private String location;
+
+    private String state;
 
     private String image;
 
@@ -75,5 +82,21 @@ public class Travel {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }
