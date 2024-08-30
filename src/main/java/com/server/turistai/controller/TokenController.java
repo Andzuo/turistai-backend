@@ -20,19 +20,20 @@ import java.time.Instant;
 @CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*")
 public class TokenController {
 
-
     private final JwtEncoder jwtEncoder;
 
     private final UserRepository userRepository;
 
     private BCryptPasswordEncoder passwordEncoder;
 
-    public TokenController(JwtEncoder jwtEncoder, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public TokenController(JwtEncoder jwtEncoder, UserRepository userRepository,
+            BCryptPasswordEncoder passwordEncoder) {
         this.jwtEncoder = jwtEncoder;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    @SuppressWarnings("unused")
     @PostMapping("/login")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
@@ -58,7 +59,6 @@ public class TokenController {
         var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
         boolean isPasswordCorrect = passwordEncoder.matches(loginRequest.password(), user.get().getPassword());
-
 
         return ResponseEntity.ok(new LoginResponse(jwtValue));
     }

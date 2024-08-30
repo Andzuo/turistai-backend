@@ -1,8 +1,6 @@
 package com.server.turistai.entities;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
@@ -20,7 +18,7 @@ public class Travel {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name= "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(nullable = false)
@@ -39,7 +37,6 @@ public class Travel {
 
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
     private List<TravelRoadMap> travelRoadMap;
-
 
     public Long getId() {
         return id;

@@ -2,8 +2,6 @@ package com.server.turistai.entities;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "tb_travelRoadMap")
 public class TravelRoadMap {

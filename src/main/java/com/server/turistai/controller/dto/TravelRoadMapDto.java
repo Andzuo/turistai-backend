@@ -1,13 +1,11 @@
 package com.server.turistai.controller.dto;
 
-import java.util.List;
-
 public class TravelRoadMapDto {
 
     private String title;
     private String comment;
     private String addres;
-    private Boolean visited; // Alterado para Boolean
+    private Boolean visited;
 
     public TravelRoadMapDto() {
     }
