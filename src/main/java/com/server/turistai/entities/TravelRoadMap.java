@@ -11,6 +11,7 @@ public class TravelRoadMap {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+    @Column(nullable = false)
     private String title;
     private String comment;
     private String addres;
