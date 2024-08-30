@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/roadmap")
+@RequestMapping("/api")
 public class TravelRoadMapController {
 
     private final TravelRepository travelRepository;
@@ -38,7 +38,7 @@ public class TravelRoadMapController {
         this.fileStorageLocation = Paths.get(fileStorageProperties.getUploadDir()).toAbsolutePath().normalize();
     }
 
-    @PostMapping("/{travelId}")
+    @PostMapping("/roadmap/{travelId}")
     public ResponseEntity<String> addRoadMapItem(@PathVariable Long travelId,
             @ModelAttribute TravelRoadMapDto roadMapDto,
             @RequestParam(value = "file", required = false) MultipartFile file,
@@ -57,9 +57,7 @@ public class TravelRoadMapController {
 
         var roadMapItem = new TravelRoadMap();
         roadMapItem.setTitle(roadMapDto.getTitle());
-        roadMapItem.setComment(roadMapDto.getComment());
         roadMapItem.setAddres(roadMapDto.getAddres());
-        roadMapItem.setVisited(roadMapDto.getVisited() != null ? roadMapDto.getVisited() : false);
         roadMapItem.setTravel(travel.get());
 
         travelRoadMapRepository.save(roadMapItem);
