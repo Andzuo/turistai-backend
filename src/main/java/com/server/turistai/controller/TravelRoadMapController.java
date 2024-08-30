@@ -2,22 +2,29 @@ package com.server.turistai.controller;
 
 import com.server.turistai.config.FileStorageProperties;
 import com.server.turistai.controller.dto.TravelRoadMapDto;
+import com.server.turistai.entities.Travel;
 import com.server.turistai.entities.TravelRoadMap;
 import com.server.turistai.repository.TravelRepository;
 import com.server.turistai.repository.TravelRoadMapRepository;
 import com.server.turistai.repository.UserRepository;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -43,7 +50,7 @@ public class TravelRoadMapController {
     @PostMapping("/{travelId}")
     public ResponseEntity<String> addRoadMapItem(@PathVariable Long travelId,
                                                  @ModelAttribute TravelRoadMapDto roadMapDto,
-                                                 @RequestParam(value = "file", required = false) List<MultipartFile> file,
+                                                 @RequestParam(value = "file", required = false) MultipartFile file,
                                                  JwtAuthenticationToken token) {
 
         var user = userRepository.findById(Integer.valueOf(token.getName()));
@@ -63,30 +70,39 @@ public class TravelRoadMapController {
         roadMapItem.setVisited(roadMapDto.getVisited() != null ? roadMapDto.getVisited() : false);
         roadMapItem.setTravel(travel.get());
 
+        travelRoadMapRepository.save(roadMapItem);
+
+        // Upload de imagem
         if (file != null && !file.isEmpty()) {
-            List<String> imageUrls = new ArrayList<>();
-            for (MultipartFile fileItem : file) {
-                if (!fileItem.isEmpty()) {
-                    try {
-                        String fileName = UUID.randomUUID() + "_" + fileItem.getOriginalFilename();
-                        Path path = Paths.get(fileStorageLocation.toString(), fileName);
+            try {
+                String fileName = travelId + "_" + file.getOriginalFilename();
+                Path path = Paths.get(fileStorageLocation.toString(), fileName);
 
-                        if (!Files.exists(fileStorageLocation)) {
-                            Files.createDirectories(fileStorageLocation);
-                        }
-
-                        Files.write(path, fileItem.getBytes());
-
-                        imageUrls.add(fileName);
-                    } catch (IOException e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar imagem.");
-                    }
+                if (!Files.exists(fileStorageLocation)) {
+                    Files.createDirectories(fileStorageLocation);
                 }
+
+                Files.write(path, file.getBytes());
+
+                roadMapItem.setImage(fileName);
+                travelRoadMapRepository.save(roadMapItem);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao salvar imagem.");
             }
-            roadMapItem.setImages(imageUrls);
-            travelRoadMapRepository.save(roadMapItem);
         }
 
         return ResponseEntity.ok("Item do roadmap criado com sucesso.");
     }
+
+
+    @GetMapping("/roadmap/{imagem}")
+    @ResponseBody
+    public byte[] getImage(@PathVariable("imagem") String imagem) throws IOException {
+        File imageFile = new File(fileStorageLocation.toString(), imagem);
+        if (imageFile != null || imagem.trim().length() > 0) {
+            return Files.readAllBytes(imageFile.toPath());
+        };
+        return null;
+    };
 }

@@ -16,19 +16,11 @@ public class TravelRoadMap {
     private String addres;
     private boolean visited;
     @Column(name = "tb_travelRoadMap_images")
-    private List<String> images;
+    private String image;
 
     @ManyToOne
     @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
-
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
-    }
 
     public Travel getTravel() {
         return travel;
@@ -78,4 +70,11 @@ public class TravelRoadMap {
         this.visited = visited;
     }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String images) {
+        this.image = images;
+    }
 }
