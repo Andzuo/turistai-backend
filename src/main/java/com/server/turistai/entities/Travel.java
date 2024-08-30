@@ -5,6 +5,7 @@ import jdk.jfr.Timestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -35,6 +36,10 @@ public class Travel {
     private String state;
 
     private String image;
+
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL)
+    private List<TravelRoadMap> travelRoadMap;
+
 
     public Long getId() {
         return id;
