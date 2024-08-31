@@ -85,12 +85,90 @@ public class TravelRoadMapController {
         return ResponseEntity.ok("Item do roadmap criado com sucesso.");
     }
 
-    @GetMapping("/roadmap/{imagem}")
+    @GetMapping("/roadmap/{travelId}")
+    public ResponseEntity<?> getRoadMap(@PathVariable Long travelId, JwtAuthenticationToken token) {
+        var user = userRepository.findById(Integer.valueOf(token.getName()));
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+        }
+
+        var travel = travelRepository.findById(travelId);
+        if (travel.isEmpty() || !travel.get().getUser().equals(user.get())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Viagem não encontrada ou não pertence ao usuário.");
+        }
+
+        // Adicionando logs para depuração
+        System.out.println("Fetching roadmaps for travelId: " + travelId);
+
+        var roadMapItems = travelRoadMapRepository.findByTravelId(travelId);
+
+        // Log do resultado da consulta
+        System.out.println("Number of roadmaps found: " + roadMapItems.stream());
+
+        return ResponseEntity.ok(roadMapItems);
+    }
+
+    @DeleteMapping("/roadmap/{roadMapId}")
+    public ResponseEntity<?> deleteRoadMap(@PathVariable Long roadMapId, JwtAuthenticationToken token) {
+        var user = userRepository.findById(Integer.valueOf(token.getName()));
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+        }
+
+        var roadMapItem = travelRoadMapRepository.findById(roadMapId);
+        if (roadMapItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item do roadmap não encontrado.");
+        }
+
+        travelRoadMapRepository.delete(roadMapItem.get());
+
+        return ResponseEntity.ok("Item do roadmap excluído com sucesso.");
+    }
+
+    @GetMapping("/roadmap/image/{imagem}")
     @ResponseBody
     public byte[] getImage(@PathVariable("imagem") String imagem) throws IOException {
         File imageFile = new File(fileStorageLocation.toString(), imagem);
-        {
-            return Files.readAllBytes(imageFile.toPath());
+        return Files.readAllBytes(imageFile.toPath());
+    }
+
+    @PostMapping("/roadmap/{roadMapId}/visited")
+    public ResponseEntity<?> markAsVisited(@PathVariable Long roadMapId, JwtAuthenticationToken token) {
+        var user = userRepository.findById(Integer.valueOf(token.getName()));
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
         }
-    };
+
+        var roadMapItem = travelRoadMapRepository.findById(roadMapId);
+        if (roadMapItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item do roadmap não encontrado.");
+        }
+
+        var roadMap = roadMapItem.get();
+        roadMap.setVisited(true);
+        travelRoadMapRepository.save(roadMap);
+
+        return ResponseEntity.ok("Local marcado como visitado.");
+    }
+
+    @PostMapping("/roadmap/{roadMapId}/comment")
+    public ResponseEntity<?> addComment(@PathVariable Long roadMapId, @RequestBody String comment,
+            JwtAuthenticationToken token) {
+        var user = userRepository.findById(Integer.valueOf(token.getName()));
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
+        }
+
+        var roadMapItem = travelRoadMapRepository.findById(roadMapId);
+        if (roadMapItem.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item do roadmap não encontrado.");
+        }
+
+        var roadMap = roadMapItem.get();
+        roadMap.getComments().add(comment);
+        travelRoadMapRepository.save(roadMap);
+
+        return ResponseEntity.ok("Comentário adicionado com sucesso.");
+    }
 }
