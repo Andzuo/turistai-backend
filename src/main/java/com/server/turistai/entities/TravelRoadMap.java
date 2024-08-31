@@ -1,5 +1,7 @@
 package com.server.turistai.entities;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -11,8 +13,9 @@ public class TravelRoadMap {
     private Long id;
     @Column(nullable = false)
     private String title;
-    private String comment;
     private String addres;
+    @ElementCollection
+    private List<String> comments;
     private boolean visited;
     @Column(name = "tb_travelRoadMap_images")
     private String image;
@@ -45,12 +48,12 @@ public class TravelRoadMap {
         this.title = title;
     }
 
-    public String getComment() {
-        return comment;
+    public List<String> getComments() {
+        return comments;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setComments(List<String> comments) {
+        this.comments = comments;
     }
 
     public String getAddres() {
