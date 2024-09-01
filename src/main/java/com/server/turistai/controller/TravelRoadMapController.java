@@ -98,13 +98,7 @@ public class TravelRoadMapController {
                     .body("Viagem não encontrada ou não pertence ao usuário.");
         }
 
-        // Adicionando logs para depuração
-        System.out.println("Fetching roadmaps for travelId: " + travelId);
-
         var roadMapItems = travelRoadMapRepository.findByTravelId(travelId);
-
-        // Log do resultado da consulta
-        System.out.println("Number of roadmaps found: " + roadMapItems.stream());
 
         return ResponseEntity.ok(roadMapItems);
     }
@@ -130,7 +124,9 @@ public class TravelRoadMapController {
     @ResponseBody
     public byte[] getImage(@PathVariable("imagem") String imagem) throws IOException {
         File imageFile = new File(fileStorageLocation.toString(), imagem);
-        return Files.readAllBytes(imageFile.toPath());
+        {
+            return Files.readAllBytes(imageFile.toPath());
+        }
     }
 
     @PostMapping("/roadmap/{roadMapId}/visited")
@@ -152,23 +148,26 @@ public class TravelRoadMapController {
         return ResponseEntity.ok("Local marcado como visitado.");
     }
 
-    @PostMapping("/roadmap/{roadMapId}/comment")
-    public ResponseEntity<?> addComment(@PathVariable Long roadMapId, @RequestBody String comment,
-            JwtAuthenticationToken token) {
-        var user = userRepository.findById(Integer.valueOf(token.getName()));
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
-        }
+    // @PostMapping("/roadmap/{roadMapId}/comment")
+    // public ResponseEntity<?> addComment(@PathVariable Long roadMapId,
+    // @RequestBody String comment,
+    // JwtAuthenticationToken token) {
+    // var user = userRepository.findById(Integer.valueOf(token.getName()));
+    // if (user.isEmpty()) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não
+    // encontrado.");
+    // }
 
-        var roadMapItem = travelRoadMapRepository.findById(roadMapId);
-        if (roadMapItem.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item do roadmap não encontrado.");
-        }
+    // var roadMapItem = travelRoadMapRepository.findById(roadMapId);
+    // if (roadMapItem.isEmpty()) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Item do roadmap não
+    // encontrado.");
+    // }
 
-        var roadMap = roadMapItem.get();
-        roadMap.getComments().add(comment);
-        travelRoadMapRepository.save(roadMap);
+    // var roadMap = roadMapItem.get();
+    // roadMap.getComments().add(comment);
+    // travelRoadMapRepository.save(roadMap);
 
-        return ResponseEntity.ok("Comentário adicionado com sucesso.");
-    }
+    // return ResponseEntity.ok("Comentário adicionado com sucesso.");
+    // }
 }
